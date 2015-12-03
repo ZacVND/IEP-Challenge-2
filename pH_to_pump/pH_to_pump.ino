@@ -13,9 +13,10 @@ const int pHS = 7;
 float T = 22 + 273; // in Kelvin
 float Es = 1.5; // Not sure if this is in V or mV
 float pHX = 0;
-
+int pumpLim = 10;//number of pump activation possible to prevent overflow
 float calcX(float Ex);//this function calculate pH(X)
 
+int limit =
 void setup() {
   Serial.begin(9600);
   pinMode(pumpA, OUTPUT);  
@@ -28,26 +29,29 @@ void loop()
   // multiply by 0.0029 because it is  2.9 mV per unit of analogRead
   pHX = calcX(analogRead(probe) * (2.9/1000));
   
+  int pumpAct = 0; //number of pump activation
+  
   //display on serial
   Serial.print("Standard pH is:  ");
   Serial.println(pHS);
   Serial.print("pH value of solution is:  ");
   Serial.println(pHX);
-  
-  if (pHX > pHS)
+  if(pumpAct <= pumpLim)
   {
-    digitalWrite(pumpA, HIGH);//turn on acid pump
-  }
-  else if (pHX < pHS)
-  {
-    digitalWrite(pumpB, HIGH);//turn on base pump
-  }
-  else
-  {
-    digitalWrite(pumpA, LOW);//turn both off
-    digitalWrite(pumpB, LOW);
+    if (pHX > pHS)
+    {
+      digitalWrite(pumpA, HIGH); //turn on acid pump
+      pumpAct++;
+    }
+    else if (pHX < pHS)
+    {
+      digitalWrite(pumpB, HIGH); //turn on base pump
+      pumpAct++;
+    }
   }
   delay(1000);
+  digitalWrite(pumpA, LOW); //turn both off
+  digitalWrite(pumpB, LOW);
 
 }
 
