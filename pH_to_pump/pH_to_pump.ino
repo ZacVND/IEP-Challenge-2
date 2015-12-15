@@ -10,13 +10,13 @@ const int pumpA =  P2_1; //Acid Pump
 const int pumpB = P2_2; //Base Pump
 const int probe = P1_5; //Probe Pin
 const int pHS = 7;
-float T = 22 + 273; // in Kelvin
-float Es = 1.5; // Not sure if this is in V or mV
+float T = 21.7 + 273; // in Kelvin
+
 float pHX = 0;
 int pumpLim = 10;//number of pump activation possible to prevent overflow
-float calcX(float Ex);//this function calculate pH(X)
+float calcX(double Ex);//this function calculate pH(X)
 
-int limit =
+int limit = 10;
 void setup() {
   Serial.begin(9600);
   pinMode(pumpA, OUTPUT);  
@@ -27,7 +27,7 @@ void loop()
 {
   // read the probe value, the electric potential at pH measuring electrode
   // multiply by 0.0029 because it is  2.9 mV per unit of analogRead
-  pHX = calcX(analogRead(probe) * (2.9/1000));
+  pHX = calcX(analogRead(probe) * (2.9/100000));
   
   int pumpAct = 0; //number of pump activation
   
@@ -55,8 +55,13 @@ void loop()
 
 }
 
-float calcX(float Ex)
+float calcX(double Ex)
 {
+  double Es = analogRead(P1_4) * (2.9/1000); // Not sure if this is in V or mV
+  Serial.print("The Es is: ");
+  Serial.println(Es);
+  Serial.print("The Ex is: ");
+  Serial.println(Ex);
   float X;
   
   X = pHS + (((Es - Ex)*Faraday)/(R*T*ln10)); //apply transfer function
