@@ -41,8 +41,26 @@ float desire = 0;
 float reading;
 float multiplier;
 
+float value; 
+int mode = 0;   //0 = auto, 1 = heat, 2 = off
+int output = 0;
+float wantedTemperature = 32.5;
+int backgroundColor = 255;
+int fillColor = 0;
+int xTemperature = 1010;
+int yTemperature = 138;
+int xThermometer = 1080;
+int yThermometer = 120;
+int xButtons = 980;
+int yButtons = 520;
+boolean buttonPlus = false;
+boolean buttonMinus = false;
+boolean buttonAuto = false;
+boolean buttonOn = false;
+boolean buttonOff = false;
+
 void setup() {
-  size(1200, 700);
+  size(1300, 700);
   smooth();
   cp5 = new ControlP5(this);
   try {
@@ -174,10 +192,10 @@ void draw() {
   background(0);
   fill(255, 255, 255);  
   rect(10, 10, 195, 670, 7);
-  rect(120, 399, 19, 221); //half chart trick
-  rect(119, 399, 41, 221); //full chart
   rect(210, 10, 720, 670, 7);
-  //rect(760, 10, 1290, 670, 7);
+  rect(940, 10, 350, 670, 7);
+  //rect(120, 399, 19, 221); //half chart trick
+  rect(119, 399, 41, 221); //full chart
   //display values:
   display();
   pH.push("incoming", pHreading);
@@ -198,7 +216,8 @@ void display(){
   fill(40, 150, 140);
   textSize(30);
   text("pH", 84, 50);
-  text("Chart", 500, 50);
+  text("Stirring", 500, 50);
+  text("Heating", 1060, 50);
   textSize(20);
   text("pH Scale", 70, 360);
   fill(10, 10, 10);
@@ -225,6 +244,11 @@ void display(){
     text("" + desire, (ChartX - 40), (ChartY2 - (desire - 3) * multiplier)+5);
     line((ChartX - 10), (ChartY2 - (desire - 3) * multiplier), (ChartX + 10), (ChartY2 - (desire - 3) * multiplier));
    }
+   
+   drawThermomether();
+   drawTemperature();
+   drawModeButtons();
+   drawSetTemperature();
 }
 
 void update(Chart c, String n, float v) {
@@ -245,4 +269,104 @@ float calcX(float Ex)
   X = pHS + (((Es - Ex)*Faraday)/(R*T*ln10)); //apply transfer function
   
   return X;
+}
+
+void drawThermomether(){
+      //content of thermometer
+  fill(209,24,24);
+  noStroke();
+  rect(xThermometer, yThermometer+100, 670, -int(5*value), 5);
+  
+  //border of thermometer
+  stroke(fillColor);
+  noFill();
+  strokeWeight(2);
+  rect(xThermometer, yThermometer+100, 100, 250, 5);
+  
+  //draw line of thermometer
+  for (int i = 10; i < 250; i = i+10) {
+    fill(fillColor);
+    line(xThermometer,yThermometer+350-i,xThermometer+20,yThermometer+350-i);  
+    if (i%50==0){
+      text( (i/5),xThermometer-64,yThermometer+350-i+16);
+    }
+  }
+  
+  //light reflect
+  //fill(255,70);
+  //noStroke();
+  //rect(xThermometer+60, yThermometer+20, 20, 210, 5);
+}
+
+void drawTemperature() {
+  textSize(32);
+  text( "Temperature :", xTemperature+10, yTemperature-20);
+  text( nf(value, 2,1), xTemperature+50, yTemperature+30); 
+  text("°C", xTemperature+96+50, yTemperature+30); 
+}
+
+void drawModeButtons() {
+    textSize(32);
+    fill(fillColor);
+    text("Heating Mode",xButtons+45,yButtons-10);
+  
+    stroke(fillColor);
+    if (mode==0) {
+      fill(200);
+    } else {
+    noFill();
+    }
+    strokeWeight(2);
+    rect(xButtons, yButtons, 80, 50, 5);
+    fill(fillColor);
+    text("Auto",xButtons+4,yButtons+35);
+    
+    stroke(fillColor);
+    if (mode==1) {
+      fill(200);
+    } else {
+    noFill();
+    }
+    strokeWeight(2);
+    rect(xButtons+100, yButtons, 80, 50, 5);
+    fill(fillColor);
+    text(" On",xButtons+104,yButtons+35);
+    
+    stroke(fillColor);
+    if (mode==2) {
+      fill(200);
+    } else {
+    noFill();
+    }
+    strokeWeight(2);
+    rect(xButtons+200, yButtons, 80, 50, 5);
+    fill(fillColor);
+    text(" Off",xButtons+204,yButtons+35);
+    
+    //-------
+    
+    
+}
+
+void drawSetTemperature() {
+    stroke(fillColor);
+    fill(230);
+    strokeWeight(2);
+    rect(xButtons+80, yButtons+70, 120, 50, 5);
+    fill(fillColor);
+    text(nf(wantedTemperature, 2,1),xButtons+100,yButtons+110);
+    
+    stroke(fillColor);
+    noFill();
+    strokeWeight(2);
+    rect(xButtons, yButtons+70, 60, 50, 5);
+    fill(fillColor);
+    text(" +",xButtons+10,yButtons+110);
+    
+     stroke(fillColor);
+    noFill();
+    strokeWeight(2);
+    rect(xButtons+ 210, yButtons+70, 60, 50, 5);
+    fill(fillColor);
+    text(" -",xButtons+ 220,yButtons+110);
 }
